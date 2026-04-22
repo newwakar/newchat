@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-window"></div>
+        <div id="input-area">
+            <input type="text" id="username" placeholder="Name">
+            <input type="text" id="message" placeholder="Message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://yflamhkpiiserkouoddn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_jeIYowehIo1v1TwDmOcmnA__scjV28B';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const chatWindow = document.getElementById('chat-window');
+        const messageInput = document.getElementById('message');
+        const userInput = document.getElementById('username');
+
+        // 1. Fetch existing messages
+        async function fetchMessages() {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true });
+            
+            if (data) {
+                chatWindow.innerHTML = '';
+                data.forEach(msg => appendMessage(msg));
+            }
+        }
+
+        // 2. Append message to UI
+        function appendMessage(msg) {
+            const div = document.createElement('div');
+            div.className = 'msg-item';
+            div.innerHTML = `<strong>${msg.username}:</strong> ${msg.content}`;
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // 3. Send new message
+        document.getElementById('send-btn').onclick = async () => {
+            const username = userInput.value || 'Anonymous';
+            const content = messageInput.value;
+            if (!content) return;
+
+            const { error } = await supabase
+                .from('messages')
+                .insert([{ username, content }]);
+
+            if (!error) messageInput.value = '';
+        };
+
+        // 4. Real-time Subscription (This makes it a real chat!)
+        supabase
+            .channel('public:messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                appendMessage(payload.new);
+            })
+            .subscribe();
+
+        fetchMessages();
+    </script> 
+</body>
+</html>
