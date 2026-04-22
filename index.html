@@ -18,42 +18,73 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://yflamhkpiiserkouoddn.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_jeIYowehIo1v1TwDmOcmnA__scjV28B';
-       // Change 'const supabase' to 'const supabaseClient'
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Use a unique name to avoid the "redeclaration" error
+const _URL = 'https://yflamhkpiiserkouoddn.supabase.co';
+const _KEY = 'sb_publishable_jeIYowehIo1v1TwDmOcmnA__scjV28B';
+const db = supabase.createClient(_URL, _KEY);
 
-// Now, update your functions to use 'supabaseClient' instead of 'supabase'
+const chatWindow = document.getElementById('chat-window');
+const messageInput = document.getElementById('message');
+const userInput = document.getElementById('username');
+
+// 1. Fetch existing messages
 async function fetchMessages() {
-    const { data, error } = await supabaseClient
+    const { data, error } = await db
         .from('messages')
         .select('*')
         .order('created_at', { ascending: true });
     
-    if (data) {
+    if (error) {
+        console.error("Fetch Error:", error.message);
+    } else {
         chatWindow.innerHTML = '';
         data.forEach(msg => appendMessage(msg));
     }
 }
 
+// 2. Add message to the screen
+function appendMessage(msg) {
+    const div = document.createElement('div');
+    div.className = 'msg-item';
+    div.innerHTML = `<strong>${msg.username}:</strong> ${msg.content}`;
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+// 3. Send message logic
 document.getElementById('send-btn').onclick = async () => {
-    const username = document.getElementById('username').value || 'Anonymous';
-    const content = document.getElementById('message').value;
-    if (!content) return;
+    const user = userInput.value || 'Anonymous';
+    const text = messageInput.value;
+    
+    if (!text) return;
 
-    const { error } = await supabaseClient
+    const { error } = await db
         .from('messages')
-        .insert([{ username, content }]);
+        .insert([{ username: user, content: text }]);
 
-    if (!error) document.getElementById('message').value = '';
+    if (error) {
+        console.error("Send Error:", error.message);
+        alert("Error sending: " + error.message);
+    } else {
+        messageInput.value = '';
+    }
 };
 
-// Update the real-time subscription too
-supabaseClient
-    .channel('public:messages')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+// 4. Real-time setup
+const channel = db.channel('room1')
+    .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages' 
+    }, payload => {
         appendMessage(payload.new);
     })
-    .subscribe();    </script> 
+    .subscribe((status) => {
+        console.log("Realtime status:", status);
+    });
+
+// Initial load
+fetchMessages();
+    </script> 
 </body>
 </html>
