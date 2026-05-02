@@ -9,61 +9,78 @@
   <style>
     body, html {
       margin: 0;
-      overflow: hidden;
+      padding: 0;
+      height: 100%;
+      width: 100%;
       background-color: #000;
+      overflow: hidden;
     }
 
-    /* This styles the container for your site once unlocked */
-    .app-container {
+    /* The Lock Screen Container */
+    #root {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      height: 100%;
+      z-index: 2; /* Keeps the lock screen on top */
+      pointer-events: auto;
+    }
+
+    /* The Hidden Site Container */
+    .site-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1; /* Sits behind the lock screen */
     }
 
     .embedded-site {
-      flex-grow: 1;
       width: 100%;
       height: 100%;
       border: none;
+    }
+
+    /* This class will be triggered when the lock screen is swiped/cleared */
+    .unlocked #root {
+      display: none; 
     }
   </style>
 </head>
 <body>
 
+<!-- The App/Lock Screen Layer -->
 <div id="root"></div>
 
-<!-- React and dependencies -->
+<!-- The Embedded Site Layer -->
+<div class="site-wrapper">
+  <object type="text/html" data="https://wchatr.vercel.app/" class="embedded-site">
+    <embed src="https://wchatr.vercel.app/" class="embedded-site">
+  </object>
+</div>
+
+<!-- Dependencies -->
 <script src='https://unpkg.com/react@17/umd/react.development.js'></script>
 <script src='https://unpkg.com/react-dom@17/umd/react-dom.development.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/classnames/2.3.1/index.min.js'></script>
 
-<!-- This script builds the Lock Screen and Menu UI -->
+<!-- The Hyperplexed Script (Creates the UI) -->
 <script src='https://codepen.io/Hyperplexed/pen/xxYJYjM/54407644e24173ad6019b766443bf2a6.js'></script>
 
 <script>
-  /* 
-     We need to wait for the React app to mount, then we inject 
-     the embedded site into the "Main" section of the UI.
-  */
-  const injectSite = () => {
-    const mainSection = document.querySelector('.app-main') || document.querySelector('#root');
-    
-    // Check if the lock screen has been bypassed/rendered
-    if (mainSection) {
-      const siteHtml = `
-        <div class="app-container">
-          <object type="text/html" data="https://wchatr.vercel.app/" class="embedded-site">
-            <embed src="https://wchatr.vercel.app/" class="embedded-site">
-          </object>
-        </div>
-      `;
-      // We append it to the root so it follows the logic of your external script.
-      // Note: If your script.js handles the UI, ensure it doesn't overwrite this.
+  // Monitor the #root div. 
+  // When the "Lock Screen" class disappears from the React app, 
+  // we ensure the site-wrapper is visible.
+  const observer = new MutationObserver(() => {
+    const lockScreen = document.querySelector('.lock-screen');
+    if (!lockScreen) {
+      document.body.classList.add('unlocked');
     }
-  };
+  });
 
-  window.addEventListener('load', injectSite);
+  observer.observe(document.getElementById('root'), { childList: true, subtree: true });
 </script>
 
 <script src="./script.js"></script>
