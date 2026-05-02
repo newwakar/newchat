@@ -4,18 +4,32 @@
   <meta charset="UTF-8">
   <title>App Menu With Lock Screen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="./style.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* Ensure the embedded content fills the screen or container */
+    .embedded-site {
+      width: 100%;
+      height: 100vh; /* Adjust height as needed */
+      border: none;
+    }
+  </style>
 </head>
 <body>
-<!-- partial:index.partial.html -->
+
+<!-- This replaces the iframe -->
+<object type="text/html" data="https://wchatr.vercel.app/" class="embedded-site">
+    <p>Your browser does not support embedded objects. <a href="https://wchatr.vercel.app/">Click here to visit the site directly.</a></p>
+</object>
+
 <div id="root"></div>
-<!-- partial -->
-<iframe>  https://wchatr.vercel.app/</iframe>iframe>
-  <script src='https://unpkg.com/react@17/umd/react.development.js'></script>
+
+<!-- Scripts -->
+<script src='https://unpkg.com/react@17/umd/react.development.js'></script>
 <script src='https://unpkg.com/react-dom@17/umd/react-dom.development.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/classnames/2.3.1/index.min.js'></script>
-<script  src="./script.js"></script>
+<script src='https://codepen.io/Hyperplexed/pen/xxYJYjM/54407644e24173ad6019b766443bf2a6.js'></script>
+<script src="./script.js"></script>
 
 </body>
 </html>
