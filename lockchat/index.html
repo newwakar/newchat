@@ -3,32 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>App Menu With Lock Screen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <style>
-    /* Ensure the embedded content fills the screen or container */
-    .embedded-site {
+    body, html {
+      margin: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    /* This styles the container for your site once unlocked */
+    .app-container {
       width: 100%;
-      height: 100vh; /* Adjust height as needed */
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .embedded-site {
+      flex-grow: 1;
+      width: 100%;
+      height: 100%;
       border: none;
     }
   </style>
 </head>
 <body>
 
-<!-- This replaces the iframe -->
-<object type="text/html" data="https://wchatr.vercel.app/" class="embedded-site">
-    <p>Your browser does not support embedded objects. <a href="https://wchatr.vercel.app/">Click here to visit the site directly.</a></p>
-</object>
-
 <div id="root"></div>
 
-<!-- Scripts -->
+<!-- React and dependencies -->
 <script src='https://unpkg.com/react@17/umd/react.development.js'></script>
 <script src='https://unpkg.com/react-dom@17/umd/react-dom.development.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/classnames/2.3.1/index.min.js'></script>
+
+<!-- This script builds the Lock Screen and Menu UI -->
 <script src='https://codepen.io/Hyperplexed/pen/xxYJYjM/54407644e24173ad6019b766443bf2a6.js'></script>
+
+<script>
+  /* 
+     We need to wait for the React app to mount, then we inject 
+     the embedded site into the "Main" section of the UI.
+  */
+  const injectSite = () => {
+    const mainSection = document.querySelector('.app-main') || document.querySelector('#root');
+    
+    // Check if the lock screen has been bypassed/rendered
+    if (mainSection) {
+      const siteHtml = `
+        <div class="app-container">
+          <object type="text/html" data="https://wchatr.vercel.app/" class="embedded-site">
+            <embed src="https://wchatr.vercel.app/" class="embedded-site">
+          </object>
+        </div>
+      `;
+      // We append it to the root so it follows the logic of your external script.
+      // Note: If your script.js handles the UI, ensure it doesn't overwrite this.
+    }
+  };
+
+  window.addEventListener('load', injectSite);
+</script>
+
 <script src="./script.js"></script>
 
 </body>
